@@ -1,4 +1,4 @@
-PDF_DIR = "./test_data/"
+PDF_DIR = "./tests/test_data"
 
 from pdf_scraper import get_raw_items_from_pdf
 
@@ -8,7 +8,7 @@ def remove_spaces_and_lines(word):
 
 
 def test_get_single_raw_item():
-    raw_items = get_raw_items_from_pdf(f"{PDF_DIR}/shporite_edited_one_item.pdf")
+    raw_items = get_raw_items_from_pdf(f"{PDF_DIR}/shoprite_edited_one_item.pdf")
     assert remove_spaces_and_lines("BROC CRWNS RPC") in remove_spaces_and_lines(
         raw_items[0]
     )
