@@ -11,5 +11,7 @@ def get_raw_items_from_pdf(path):
     for page in reader.pages:
         full_txt += page.extract_text()
 
+    full_txt = full_txt.replace("\xa0", "")
+
     print(full_txt)
     return []
