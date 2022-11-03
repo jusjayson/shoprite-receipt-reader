@@ -23,10 +23,18 @@ def get_raw_items_from_pdf(path):
     for page in reader.pages:
         full_txt += page.extract_text()
 
+    # Remove unnecessary chars
     full_txt = full_txt.replace("\xa0", "")
+
+    # Remove prefix text
     full_txt = full_txt[
         re.search(rf"{add_osn_to_word('Groceries')}:", full_txt).end() :
-    ]  # Start after groceries label
+    ]
+
+    # Remove suffix text
+    full_txt = full_txt[
+        : re.search(add_osn_to_word("Payment Information"), full_txt).start()
+    ]
 
     print([full_txt])
     return []
