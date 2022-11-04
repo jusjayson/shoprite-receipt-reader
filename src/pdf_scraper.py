@@ -59,6 +59,9 @@ def clean_full_txt(full_txt):
     return full_txt
 
 
+snl = r"(?:[\s\n]*)"
+
+
 def get_raw_items_from_pdf(path):
     # Load pdf to str
 
@@ -66,13 +69,13 @@ def get_raw_items_from_pdf(path):
     full_txt = clean_full_txt(full_txt)
     print([full_txt])
     matches = re.findall(
-        strip_new_lines(rf"({ITEM_NAME_PATTERN})")  # name
-        + strip_new_lines(rf"([0-9{NON_NEWLINE_WHITES_PATTERN}]+)")  # sku
-        + strip_new_lines(
-            rf"([0-9]+[{NON_NEWLINE_WHITES_PATTERN}]+x[{NON_NEWLINE_WHITES_PATTERN}]+\$[0-9]+\.[0-9]+)"
-        )  # unit at price
-        + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[{NON_NEWLINE_WHITES_PATTERN}]*:[{NON_NEWLINE_WHITES_PATTERN}]\$)?"  # coupon codes
-        + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+\n?|\$[0-9]+\.[0-9]+\n?)?"  # price per unit
+        rf"({ITEM_NAME_PATTERN}){snl}"  # name
+        + rf"([0-9{NON_NEWLINE_WHITES_PATTERN}]+){snl}"  # sku
+        + rf"([0-9]+[{NON_NEWLINE_WHITES_PATTERN}]+x[{NON_NEWLINE_WHITES_PATTERN}]+\$[0-9]+\.[0-9]+){snl}"
+        # unit at price
+        + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[ \t]*:[ \t]*\$[0-9]+\.[0-9]+)?{snl}"  # coupon codes
+        # + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[{NON_NEWLINE_WHITES_PATTERN}]*:[{NON_NEWLINE_WHITES_PATTERN}]\$[0-9]+\.[0-9]+)?{snl}"  # coupon codes
+        + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+\n?|\$[0-9]+\.[0-9]+\n?)?{snl}"  # price per unit
         + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?"  # price /w tax code may appear first
         + r"(?:\d+/\d+\n?)?"  # page num may appear first
         + rf"({add_osn_to_word('Qty')}:\s*[0-9]+\.[0-9]+[^$\n0-0]+)?"  # quantity of unit
