@@ -13,6 +13,20 @@ def add_osn_to_word(word):
     return rf"{osn}" + rf"{osn}".join(rf"{letter}" for letter in word)
 
 
+GMAIL_PATTERN = (
+    r"(\d+/\d+/\d+.*?\d+:\d+\s[A-Z]{2})?"  # datetime
+    + add_osn_to_word("Gmail")
+    + r".*?"
+    + add_osn_to_word("receipt")
+    + r".*?"
+    + rf"({add_osn_to_word('http')}s?"
+    + r".*?"
+    + rf"{add_osn_to_word('msg-f')}"  # message id
+    + rf".*?:\d+?"
+    + rf".*?\d+[\s\n]?/\d+)?"
+)
+
+
 def get_raw_items_from_pdf(path):
     import os
 
@@ -26,6 +40,7 @@ def get_raw_items_from_pdf(path):
     # Remove/Replace unnecessary chars
     full_txt = full_txt.replace("\xa0", "")
     full_txt = full_txt.replace("×", "x")
+    full_txt = re.sub(GMAIL_PATTERN, "", full_txt)
 
     # Remove prefix text
     full_txt = full_txt[
