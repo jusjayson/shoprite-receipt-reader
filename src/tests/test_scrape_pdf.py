@@ -8,16 +8,27 @@ def remove_spaces_and_lines(word):
 
 
 def test_remove_prefix():
-    prefix_phrases = (
-        "SHOPRITE OF ANONVYLLE",
-        "Your digital receipt",
-        "ananomus@gmail.com",
-    )
+    prefix_phrases = ("Your digital receipt", "ananomus@gmail.com", "Dear ANAN OMUS")
     full_txt = get_full_txt_from_pdf(f"{PDF_DIR}/shoprite_edited.pdf")
     assert all(prefix_phrase in full_txt for prefix_phrase in prefix_phrases)
 
     full_txt = clean_full_txt(full_txt)
     assert not any(prefix_phrase in full_txt for prefix_phrase in prefix_phrases)
+
+
+def test_remove_suffix():
+    suffix_phrases = (
+        "ONLINE PAYMENT $221.80",
+        "SHOPRITE OF ANONVYLLE",
+        "This e-mail was sent to",
+    )
+    full_txt = get_full_txt_from_pdf(f"{PDF_DIR}/shoprite_edited.pdf")
+    assert all(suffix_phrase in full_txt for suffix_phrase in suffix_phrases)
+
+    full_txt = clean_full_txt(full_txt)
+    assert not any(suffix_phrase in full_txt for suffix_phrase in suffix_phrases)
+
+
 
 def test_get_single_raw_item():
     raw_item = get_raw_items_from_pdf(f"{PDF_DIR}/shoprite_edited_one_item.pdf")[0]
