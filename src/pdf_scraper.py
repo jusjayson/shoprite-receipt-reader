@@ -14,16 +14,12 @@ def add_osn_to_word(word):
 
 
 GMAIL_PATTERN = (
-    r"(\d+/\d+/\d+.*?\d+:\d+\s[A-Z]{2})?"  # datetime
-    + add_osn_to_word("Gmail")
+    rf"({add_osn_to_word('http')}s?"
     + r".*?"
-    + add_osn_to_word("receipt")
-    + r".*?"
-    + rf"({add_osn_to_word('http')}s?"
-    + r".*?"
-    + rf"{add_osn_to_word('msg-f')}"  # message id
-    + rf".*?:\d+?"
-    + rf".*?\d+[\s\n]?/\d+)?"
+    + rf"{add_osn_to_word('msg-f')}"
+    + r".*?:\d+?"
+    + r"\d+/\d+/\d+.*?\d+:\d+\s[A-Z]+\s*)?"  # datetime
+    + rf"({add_osn_to_word('Gmail')}.*?{add_osn_to_word('receipt')})"
 )
 
 
