@@ -17,8 +17,6 @@ def strip_new_lines(pattern):
     return rf"(?:\n*){pattern}(?:\n*)"
 
 
-NON_NEWLINE_WHITES_PATTERN = r"\t\r\f\v "
-ITEM_NAME_PATTERN = rf"[\w\-_{NON_NEWLINE_WHITES_PATTERN}\']+"
 GMAIL_URL_PATTERN = (
     rf"{add_osn_to_word('http')}s?"
     + r".*?"
@@ -62,6 +60,9 @@ def clean_full_txt(full_txt):
 snl = r"(?:[\s\n]*)"
 
 
+ITEM_NAME_PATTERN = rf"[\w\-_ \t\']+"
+
+
 def get_raw_items_from_pdf(path):
     # Load pdf to str
 
@@ -70,11 +71,10 @@ def get_raw_items_from_pdf(path):
     print([full_txt])
     matches = re.findall(
         rf"({ITEM_NAME_PATTERN}){snl}"  # name
-        + rf"([0-9{NON_NEWLINE_WHITES_PATTERN}]+){snl}"  # sku
-        + rf"([0-9]+[{NON_NEWLINE_WHITES_PATTERN}]+x[{NON_NEWLINE_WHITES_PATTERN}]+\$[0-9]+\.[0-9]+){snl}"
+        + rf"([0-9 \t]+){snl}"  # sku
+        + rf"([0-9]+[ \t]+x[ \t]+\$[0-9]+\.[0-9]+){snl}"
         # unit at price
         + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[ \t]*:[ \t]*\$[0-9]+\.[0-9]+)?{snl}"  # coupon codes
-        # + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[{NON_NEWLINE_WHITES_PATTERN}]*:[{NON_NEWLINE_WHITES_PATTERN}]\$[0-9]+\.[0-9]+)?{snl}"  # coupon codes
         + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+\n?|\$[0-9]+\.[0-9]+\n?)?{snl}"  # price per unit
         + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?"  # price /w tax code may appear first
         + r"(?:\d+/\d+\n?)?"  # page num may appear first
