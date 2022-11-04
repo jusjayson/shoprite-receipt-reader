@@ -13,14 +13,16 @@ def add_osn_to_word(word):
     return rf"{osn}" + rf"{osn}".join(rf"{letter}" for letter in word)
 
 
-GMAIL_PATTERN = (
-    rf"({add_osn_to_word('http')}s?"
+GMAIL_URL_PATTERN = (
+    rf"{add_osn_to_word('http')}s?"
     + r".*?"
     + rf"{add_osn_to_word('msg-f')}"
-    + r".*?:\d+?"
-    + r"\d+/\d+/\d+.*?\d+:\d+\s[A-Z]+\s*)?"  # datetime
-    + rf"({add_osn_to_word('Gmail')}.*?{add_osn_to_word('receipt')})"
+    + r".*?:\d+"
 )
+GMAIL_DT_PATTERN = r"\d+/\d+/\d+.*?\d+:\d+\s[A-Z]+\s*"
+GMAIL_NAME_PATTERN = rf"{add_osn_to_word('Gmail')}.*?{add_osn_to_word('receipt')}"
+
+GMAIL_PATTERN = rf"{GMAIL_URL_PATTERN}{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}|{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}{GMAIL_URL_PATTERN}"
 
 
 def get_full_txt_from_pdf(path):
