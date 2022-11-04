@@ -29,6 +29,14 @@ def test_remove_suffix():
     assert not any(suffix_phrase in full_txt for suffix_phrase in suffix_phrases)
 
 
+def test_remove_gmail_pattern():
+    full_txt = get_full_txt_from_pdf(f"{PDF_DIR}/shoprite_edited.pdf")
+    assert "gmail" in full_txt
+    assert "https://mail.google.com" in full_txt
+    full_txt = clean_full_txt(full_txt)
+    assert "gmail" not in full_txt
+    assert "https://mail.google.com" not in full_txt
+
 
 def test_get_single_raw_item():
     raw_item = get_raw_items_from_pdf(f"{PDF_DIR}/shoprite_edited_one_item.pdf")[0]
