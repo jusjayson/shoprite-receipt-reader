@@ -70,3 +70,24 @@ def test_get_one_item_per_page():
         raw_item_three[2]
     )
 
+
+def test_across_page():
+    raw_items = get_raw_items_from_pdf(
+        f"{PDF_DIR}/shoprite_edited_item_across_page.pdf"
+    )
+    raw_item = raw_items[0]
+    print(
+        raw_item,
+        raw_items[1],
+    )
+    assert remove_spaces_and_lines("PEPPER HABANERO 10") in remove_spaces_and_lines(
+        raw_item[0]
+    )
+    assert remove_spaces_and_lines("3125") in remove_spaces_and_lines(raw_item[1])
+    assert remove_spaces_and_lines("1 x $0.30") in remove_spaces_and_lines(raw_item[2])
+    assert remove_spaces_and_lines("Price: $6.00/lb") in remove_spaces_and_lines(
+        raw_item[3]
+    )
+    assert remove_spaces_and_lines("Qty: 0.05lb") in remove_spaces_and_lines(
+        raw_item[4]
+    )
