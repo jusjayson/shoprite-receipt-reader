@@ -56,17 +56,9 @@ def get_raw_items_from_pdf(path):
         rf"([\w\-_\s\']+\n)"  # name
         + rf"([\d\s]+\n?)"  # sku
         + rf"(\d+\s+x\s+\$\d+\.\d+)"  # unit at price
-        + rf"({add_osn_to_word('Price:')}\s*\$\d+\.\d+/[lb]*)+"  # price per unit
-        # + rf"({add_osn_to_word('Price:')}\s*?\$\d+\.\d+/[lb]{2}\n?)?",  # price per unit
-        # + rf".*?"
+        + rf"({add_osn_to_word('Price:')}\s*\$\d+\.\d+/[^$\n]+\n?|\$\d+\.\d+\n?)?"  # price per unit
+        + rf"(?:\$\d+\.\d+\s+\w+\n)?"  # price /w tax code may appear first
         + rf"({add_osn_to_word('Qty:')}\s*\d+\.?\d*?\w+)?",  # quantity of unit
         full_txt,
     )
-    print([full_txt])
     return matches
-    # + rf"({add_osn_to_word('Price:')}\s*?\$\d+\.\d+/\w{3,20}?\n?|\$\d+\.\d+\n?)?"  # price per unit
-
-
-"\n BROC CRWNS RPC\n3082\n1 x $6.41\nPrice: $1.99/lb\nQty: 3.22lb\n 11/2/22, 5:19 PM"
-"\n \n PEPPER HABANERO 10\n3125\n1 x $0.30\nPrice: $6.00/lb$0.30 FWT\nQty: 0.05lb\n"
-r"Price:\s*\$\d+\.\d+/[lb]{2}\n?"
