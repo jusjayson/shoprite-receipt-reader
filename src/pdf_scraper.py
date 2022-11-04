@@ -13,6 +13,12 @@ def add_osn_to_word(word):
     return rf"{osn}" + rf"{osn}".join(rf"{letter}" for letter in word)
 
 
+def strip_new_lines(pattern):
+    return rf"(?:\n*){pattern}(?:\n*)"
+
+
+NON_NEWLINE_WHITES_PATTERN = r"\t\r\f\v "
+ITEM_NAME_PATTERN = rf"[\w\-_{NON_NEWLINE_WHITES_PATTERN}\']+"
 GMAIL_URL_PATTERN = (
     rf"{add_osn_to_word('http')}s?"
     + r".*?"
@@ -21,8 +27,8 @@ GMAIL_URL_PATTERN = (
 )
 GMAIL_DT_PATTERN = r"\d+/\d+/\d+.*?\d+:\d+\s[A-Z]+\s*"
 GMAIL_NAME_PATTERN = rf"{add_osn_to_word('Gmail')}.*?{add_osn_to_word('receipt')}"
-
-GMAIL_PATTERN = rf"{GMAIL_URL_PATTERN}{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}|{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}{GMAIL_URL_PATTERN}"
+GMAIL_PATTERN = rf"{GMAIL_URL_PATTERN}{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}|{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}{GMAIL_URL_PATTERN}|{GMAIL_NAME_PATTERN}"
+PRICE_W_TAX_CODE_PATTERN = r"\$\d+\.\d+\s*[A-Z]+[\n\s]*"
 
 
 def get_full_txt_from_pdf(path):
@@ -56,13 +62,22 @@ def clean_full_txt(full_txt):
 def get_raw_items_from_pdf(path):
     # Load pdf to str
 
+    full_txt = get_full_txt_from_pdf(path)
+    full_txt = clean_full_txt(full_txt)
+    print([full_txt])
     matches = re.findall(
-        rf"([\w\-_\s\']+\n)"  # name
-        + rf"([\d\s]+\n?)"  # sku
-        + rf"(\d+\s+x\s+\$\d+\.\d+)"  # unit at price
-        + rf"({add_osn_to_word('Price:')}\s*\$\d+\.\d+/[^$\n]+\n?|\$\d+\.\d+\n?)?"  # price per unit
-        + rf"(?:\$\d+\.\d+\s+\w+\n)?"  # price /w tax code may appear first
-        + rf"({add_osn_to_word('Qty:')}\s*\d+\.?\d*?\w+)?",  # quantity of unit
+        strip_new_lines(rf"({ITEM_NAME_PATTERN})")  # name
+        + strip_new_lines(rf"([0-9{NON_NEWLINE_WHITES_PATTERN}]+)")  # sku
+        + strip_new_lines(
+            rf"([0-9]+[{NON_NEWLINE_WHITES_PATTERN}]+x[{NON_NEWLINE_WHITES_PATTERN}]+\$[0-9]+\.[0-9]+)"
+        )  # unit at price
+        + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[{NON_NEWLINE_WHITES_PATTERN}]*:[{NON_NEWLINE_WHITES_PATTERN}]\$)?"  # coupon codes
+        + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+\n?|\$[0-9]+\.[0-9]+\n?)?"  # price per unit
+        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?"  # price /w tax code may appear first
+        + r"(?:\d+/\d+\n?)?"  # page num may appear first
+        + rf"({add_osn_to_word('Qty')}:\s*[0-9]+\.[0-9]+[^$\n0-0]+)?"  # quantity of unit
+        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?",  # price /w tax code may appear afterwards
         full_txt,
     )
+
     return matches
