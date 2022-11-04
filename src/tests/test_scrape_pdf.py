@@ -1,11 +1,23 @@
 PDF_DIR = "./tests/test_data"
 
-from pdf_scraper import get_raw_items_from_pdf
+from pdf_scraper import clean_full_txt, get_full_txt_from_pdf, get_raw_items_from_pdf
 
 
 def remove_spaces_and_lines(word):
     return word.replace(" ", "").replace("\n", "")
 
+
+def test_remove_prefix():
+    prefix_phrases = (
+        "SHOPRITE OF ANONVYLLE",
+        "Your digital receipt",
+        "ananomus@gmail.com",
+    )
+    full_txt = get_full_txt_from_pdf(f"{PDF_DIR}/shoprite_edited.pdf")
+    assert all(prefix_phrase in full_txt for prefix_phrase in prefix_phrases)
+
+    full_txt = clean_full_txt(full_txt)
+    assert not any(prefix_phrase in full_txt for prefix_phrase in prefix_phrases)
 
 def test_get_single_raw_item():
     raw_item = get_raw_items_from_pdf(f"{PDF_DIR}/shoprite_edited_one_item.pdf")[0]
