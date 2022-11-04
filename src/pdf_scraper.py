@@ -61,6 +61,7 @@ snl = r"(?:[\s\n]*)"
 
 
 ITEM_NAME_PATTERN = rf"[\w\-_ \t\']+"
+PRICE_W_TAX_CODE_PATTERN = r"\$\d+\.\d+\s*[A-Z]+"
 
 
 def get_raw_items_from_pdf(path):
@@ -68,18 +69,16 @@ def get_raw_items_from_pdf(path):
 
     full_txt = get_full_txt_from_pdf(path)
     full_txt = clean_full_txt(full_txt)
-    print([full_txt])
     matches = re.findall(
         rf"({ITEM_NAME_PATTERN}){snl}"  # name
         + rf"([0-9 \t]+){snl}"  # sku
         + rf"([0-9]+[ \t]+x[ \t]+\$[0-9]+\.[0-9]+){snl}"
-        # unit at price
         + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[ \t]*:[ \t]*\$[0-9]+\.[0-9]+)?{snl}"  # coupon codes
-        + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+\n?|\$[0-9]+\.[0-9]+\n?)?{snl}"  # price per unit
-        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?"  # price /w tax code may appear first
+        + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+|\$[0-9]+\.[0-9]+)?{snl}"  # price per unit
+        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?{snl}"  # price /w tax code may appear first
         + r"(?:\d+/\d+\n?)?"  # page num may appear first
         + rf"({add_osn_to_word('Qty')}:\s*[0-9]+\.[0-9]+[^$\n0-0]+)?"  # quantity of unit
-        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?",  # price /w tax code may appear afterwards
+        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?{snl}",  # price /w tax code may appear afterwards
         full_txt,
     )
 
