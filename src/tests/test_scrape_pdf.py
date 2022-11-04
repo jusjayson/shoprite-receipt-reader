@@ -42,3 +42,31 @@ def test_get_raw_items_on_single_page():
     assert remove_spaces_and_lines("Price: $6.00/lb") in remove_spaces_and_lines(
         raw_item_two[3]
     )
+
+def test_get_one_item_per_page():
+    raw_items = get_raw_items_from_pdf(f"{PDF_DIR}/shoprite_edited_one_item_per_pg.pdf")
+    raw_item_one, raw_item_two, raw_item_three = raw_items
+    assert remove_spaces_and_lines("BROC CRWNS RPC") in remove_spaces_and_lines(
+        raw_item_one[0]
+    )
+    assert remove_spaces_and_lines("1 x $6.41") in remove_spaces_and_lines(
+        raw_item_one[2]
+    )
+
+    assert remove_spaces_and_lines("PEPPE GREEN RPC 22") in remove_spaces_and_lines(
+        raw_item_two[0]
+    )
+    assert remove_spaces_and_lines("1 x $2.18") in remove_spaces_and_lines(
+        raw_item_two[2]
+    )
+
+    assert remove_spaces_and_lines("REY PARCHMENT PAPE") in remove_spaces_and_lines(
+        raw_item_three[0]
+    )
+    assert remove_spaces_and_lines("1090074331") in remove_spaces_and_lines(
+        raw_item_three[1]
+    )
+    assert remove_spaces_and_lines("1 x $3.79") in remove_spaces_and_lines(
+        raw_item_three[2]
+    )
+
