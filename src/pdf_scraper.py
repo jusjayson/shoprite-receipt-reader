@@ -8,7 +8,7 @@ def add_osn_to_word(word):
 
     - PyPDF2 may inject unexpected spaces when reading PDF
     """
-    osn = r"[\s\n]?"  # optional space, newline
+    osn = r"(?:[\s\n]?)"  # optional space, newline
 
     return rf"{osn}" + rf"{osn}".join(rf"{letter}" for letter in word)
 
