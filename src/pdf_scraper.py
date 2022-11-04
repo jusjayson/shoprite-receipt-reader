@@ -40,15 +40,6 @@ def clean_full_txt(full_txt):
     # Remove/Replace unnecessary chars
     full_txt = full_txt.replace("\xa0", "")
     full_txt = full_txt.replace("×", "x")
-    full_txt = full_txt[
-        re.search(rf"{add_osn_to_word('Groceries')}:", full_txt).end() :
-    ]  # Start after groceries label
-    full_txt = re.sub(GMAIL_PATTERN, "", full_txt)
-    return full_txt
-
-
-def get_raw_items_from_pdf(path):
-    # Load pdf to str
 
     # Remove prefix text
     full_txt = full_txt[
@@ -59,6 +50,13 @@ def get_raw_items_from_pdf(path):
     full_txt = full_txt[
         : re.search(add_osn_to_word("Payment Information"), full_txt).start()
     ]
+
+    full_txt = re.sub(GMAIL_PATTERN, "", full_txt)
+    return full_txt
+
+
+def get_raw_items_from_pdf(path):
+    # Load pdf to str
 
     matches = re.findall(
         rf"([\w\-_\s\']+\n)"  # name
