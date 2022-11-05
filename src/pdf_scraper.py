@@ -84,9 +84,39 @@ def get_raw_items_from_pdf(path):
 
     return matches
 
+
+def parse_raw_item(raw_item_and_iterable_and_master):
+    raw_item, iterable, master_info = raw_item_and_iterable_and_master
+    iterable.append(
+        {
+            "Name": master_info.get(raw_item[1], {}).get("Name")
+            or raw_item[0].lstrip(),
+            "SKU": raw_item[1],
+            "Price per quantity": raw_item[2],
+            "Price per unit": re.sub(r"Price:\s+", "", raw_item[4]) or None,
+            "Quantity": re.sub(r"Qty:\s+", "", raw_item[5]) or None,
+            "Cat": master_info.get(raw_item[1], {}).get("Cat"),
+        }
+    )
+
+
 def import_master_info_from_csv(master_path):
     with open(master_path) as master_file:
         reader = csv.DictReader(master_file)
         return {row["SKU"]: {"Name": row["Name"], "Cat": row["Cat"]} for row in reader}
 
+
+def get_parsed_items_from_pdf(import_path, master_path=None):
+
+    master_info = import_master_info_from_csv(master_path) if master_path else {}
+    parsed_items = Manager().list()
+    raw_items = get_raw_items_from_pdf(import_path)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        executor.map(
+            parse_raw_item,
+            [(raw_item, parsed_items, master_info) for raw_item in raw_items],
+            timeout=60,
+        )
+
+    return parsed_items
 
