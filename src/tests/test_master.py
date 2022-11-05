@@ -1,4 +1,9 @@
-from pdf_scraper import get_parsed_items_from_pdf, import_master_info_from_csv
+import os
+import pathlib
+from pdf_scraper import (
+    get_parsed_items_from_pdf,
+    import_master_info_from_csv,
+)
 
 PDF_DIR = "./tests/test_data"
 
@@ -14,5 +19,5 @@ def test_master_replaces_name_and_cat():
     parsed_item = get_parsed_items_from_pdf(
         f"{PDF_DIR}/shoprite_edited.pdf", f"{PDF_DIR}/master.csv"
     )[0]
-    assert parsed_item["Name"] == "Fresh Brocolli"
+    assert parsed_item["Name"] == "Fresh Broccoli"
     assert parsed_item["Cat"] == "Food"

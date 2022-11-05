@@ -1,5 +1,11 @@
-from PyPDF2 import PdfReader
+import csv
+import concurrent.futures
+import os
 import re
+import shutil
+from multiprocessing import Manager
+
+from PyPDF2 import PdfReader
 
 
 def add_osn_to_word(word):
@@ -26,7 +32,6 @@ GMAIL_URL_PATTERN = (
 GMAIL_DT_PATTERN = r"\d+/\d+/\d+.*?\d+:\d+\s[A-Z]+\s*"
 GMAIL_NAME_PATTERN = rf"{add_osn_to_word('Gmail')}.*?{add_osn_to_word('receipt')}"
 GMAIL_PATTERN = rf"{GMAIL_URL_PATTERN}{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}|{GMAIL_DT_PATTERN}{GMAIL_NAME_PATTERN}{GMAIL_URL_PATTERN}|{GMAIL_NAME_PATTERN}"
-PRICE_W_TAX_CODE_PATTERN = r"\$\d+\.\d+\s*[A-Z]+[\n\s]*"
 
 
 def get_full_txt_from_pdf(path):
@@ -57,9 +62,7 @@ def clean_full_txt(full_txt):
     return full_txt
 
 
-snl = r"(?:[\s\n]*)"
-
-
+NO_SPACE = r"(?:[\s\n]*)"
 ITEM_NAME_PATTERN = rf"[\w\-_ \t\']+"
 PRICE_W_TAX_CODE_PATTERN = r"\$\d+\.\d+\s*[A-Z]+"
 
@@ -70,15 +73,15 @@ def get_raw_items_from_pdf(path):
     full_txt = get_full_txt_from_pdf(path)
     full_txt = clean_full_txt(full_txt)
     matches = re.findall(
-        rf"({ITEM_NAME_PATTERN}){snl}"  # name
-        + rf"([0-9 \t]+){snl}"  # sku
-        + rf"([0-9]+[ \t]+x[ \t]+\$[0-9]+\.[0-9]+){snl}"
-        + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[ \t]*:[ \t]*\$[0-9]+\.[0-9]+)?{snl}"  # coupon codes
-        + rf"({add_osn_to_word('Price:')}\s*\$[0-9]+\.[0-9]+/[^$\n]+|\$[0-9]+\.[0-9]+)?{snl}"  # price per unit
-        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?{snl}"  # price /w tax code may appear first
+        rf"({ITEM_NAME_PATTERN}){NO_SPACE}"  # name
+        + rf"([\d \t]+){NO_SPACE}"  # sku
+        + rf"(\d+[ \t]+x[ \t]+\$\d+\.\d+){NO_SPACE}"  # price per quantity
+        + rf"(\*+[A-Z]+\*+{ITEM_NAME_PATTERN}[ \t]*:[ \t]*\$\d+\.\d+)?{NO_SPACE}"  # coupon codes
+        + rf"({add_osn_to_word('Price:')}\s*\$\d+\.\d+/[^$\n]+|\$\d+\.\d+)?{NO_SPACE}"  # price per unit
+        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?{NO_SPACE}"  # price /w tax code may appear first
         + r"(?:\d+/\d+\n?)?"  # page num may appear first
-        + rf"({add_osn_to_word('Qty')}:\s*[0-9]+\.[0-9]+[^$\n0-0]+)?"  # quantity of unit
-        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?{snl}",  # price /w tax code may appear afterwards
+        + rf"({add_osn_to_word('Qty')}:[ \t]*\d+\.\d+[^$\n]+)?"  # quantity of unit
+        + rf"(?:{PRICE_W_TAX_CODE_PATTERN})?{NO_SPACE}",  # price /w tax code may appear afterwards
         full_txt,
     )
 
@@ -87,15 +90,15 @@ def get_raw_items_from_pdf(path):
 
 def parse_raw_item(raw_item_and_iterable_and_master):
     raw_item, iterable, master_info = raw_item_and_iterable_and_master
+    sku = raw_item[1].replace(" ", "")
     iterable.append(
         {
-            "Name": master_info.get(raw_item[1], {}).get("Name")
-            or raw_item[0].lstrip(),
-            "SKU": raw_item[1],
+            "Name": master_info.get(sku, {}).get("Name") or raw_item[0].lstrip(),
+            "SKU": sku,
             "Price per quantity": raw_item[2],
             "Price per unit": re.sub(r"Price:\s+", "", raw_item[4]) or None,
             "Quantity": re.sub(r"Qty:\s+", "", raw_item[5]) or None,
-            "Cat": master_info.get(raw_item[1], {}).get("Cat"),
+            "Cat": master_info.get(sku, {}).get("Cat"),
         }
     )
 
