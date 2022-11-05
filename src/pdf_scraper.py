@@ -141,3 +141,18 @@ def get_parsed_items_from_pdf(import_path, master_path=None):
     update_master(parsed_items, master_path, master_info)
     return parsed_items
 
+
+def export_receipt_to_csv(import_path, export_path, master_path=None):
+    parsed_items = get_parsed_items_from_pdf(import_path, master_path)
+    headers = parsed_items[0].keys()
+
+    with open(export_path, "w") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=headers)
+
+        writer.writeheader()
+        for parsed_item in parsed_items:
+            writer.writerow(parsed_item)
+
+
+if __name__ == "__main__":
+    export_receipt_to_csv("shoprite.pdf", "output.csv", "master.csv")
