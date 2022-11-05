@@ -109,6 +109,24 @@ def import_master_info_from_csv(master_path):
         return {row["SKU"]: {"Name": row["Name"], "Cat": row["Cat"]} for row in reader}
 
 
+# XXX: Will be replaced on db addition
+def update_master(parsed_items, master_path, master_info=None):
+    if master_exists := os.path.isfile(master_path):
+        shutil.copy(master_path, f"{master_path}.bak")
+    master_info = (
+        master_info or import_master_info_from_csv(master_path) if master_exists else {}
+    )
+    for parsed_item in parsed_items:
+        if not master_info.get(parsed_item["SKU"]):
+            master_info[parsed_item["SKU"]] = {"Name": parsed_item["Name"], "Cat": None}
+
+    with open(master_path, "w") as new_master_file:
+        writer = csv.DictWriter(new_master_file, fieldnames=("Name", "SKU", "Cat"))
+        writer.writeheader()
+        for sku, data in master_info.items():
+            writer.writerow({"Name": data["Name"], "SKU": sku, "Cat": data["Cat"]})
+
+
 def get_parsed_items_from_pdf(import_path, master_path=None):
 
     master_info = import_master_info_from_csv(master_path) if master_path else {}
@@ -120,6 +138,6 @@ def get_parsed_items_from_pdf(import_path, master_path=None):
             [(raw_item, parsed_items, master_info) for raw_item in raw_items],
             timeout=60,
         )
-
+    update_master(parsed_items, master_path, master_info)
     return parsed_items
 
