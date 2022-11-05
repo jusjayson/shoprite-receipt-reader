@@ -1,6 +1,11 @@
 PDF_DIR = "./tests/test_data"
 
-from pdf_scraper import clean_full_txt, get_full_txt_from_pdf, get_raw_items_from_pdf
+from pdf_scraper import (
+    clean_full_txt,
+    get_full_txt_from_pdf,
+    get_parsed_items_from_pdf,
+    get_raw_items_from_pdf,
+)
 
 
 def remove_spaces_and_lines(word):
@@ -115,10 +120,7 @@ def test_across_page():
         f"{PDF_DIR}/shoprite_edited_item_across_page.pdf"
     )
     raw_item = raw_items[0]
-    print(
-        raw_item,
-        raw_items[1],
-    )
+
     assert remove_spaces_and_lines("PEPPER HABANERO 10") in remove_spaces_and_lines(
         raw_item[0]
     )
@@ -130,3 +132,17 @@ def test_across_page():
     assert remove_spaces_and_lines("Qty: 0.05lb") in remove_spaces_and_lines(
         raw_item[5]
     )
+
+
+def test_get_parsed_single_item():
+    parsed_item = get_parsed_items_from_pdf(
+        f"{PDF_DIR}/shoprite_edited_one_item_per_pg.pdf"
+    )[1]
+    assert parsed_item == {
+        "Name": "PEPPE GREEN RPC 22",
+        "SKU": "4065",
+        "Price per quantity": "1 x $2.18",
+        "Price per unit": "$1.49/lb",
+        "Quantity": "1.46lb",
+        "Cat": None,
+    }
