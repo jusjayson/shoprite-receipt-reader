@@ -99,6 +99,8 @@ def parse_raw_item(raw_item_and_iterable_and_master):
             "Price per unit": re.sub(r"Price:\s+", "", raw_item[4]) or None,
             "Quantity": re.sub(r"Qty:\s+", "", raw_item[5]) or None,
             "Cat": master_info.get(sku, {}).get("Cat"),
+            "Total paid": int(re.match(r"\d+", raw_item[2]).group())
+            * float(re.search(r"\$(\d+\.\d+)", raw_item[2]).group(1)),
         }
     )
 
