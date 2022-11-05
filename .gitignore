@@ -127,3 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# personal files
+src/*.csv
+src/*.bak
+src/*.pdf
+src/*.odg
+src/.~lock*
+history/
+
+# drivers
+drivers/
