@@ -3,6 +3,7 @@ import pathlib
 from pdf_scraper import (
     get_parsed_items_from_pdf,
     import_master_info_from_csv,
+    update_master,
 )
 
 PDF_DIR = "./tests/test_data"
