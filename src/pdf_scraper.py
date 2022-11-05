@@ -83,3 +83,10 @@ def get_raw_items_from_pdf(path):
     )
 
     return matches
+
+def import_master_info_from_csv(master_path):
+    with open(master_path) as master_file:
+        reader = csv.DictReader(master_file)
+        return {row["SKU"]: {"Name": row["Name"], "Cat": row["Cat"]} for row in reader}
+
+
